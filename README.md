@@ -20,10 +20,14 @@ git submodule update --init
 2. Setup StreamDiffusion environment.
    Please follow instructions on their github page.
 
-3. Open the .toe project
-```
-conda activate YOUR_JUST_CREATED_ENV
-```
+   After having installed them, the additional libraries needed:
+   ```
+   conda activate YOUR_JUST_CREATED_ENV
+   pip install PyOpenGL PyOpenGL_accelerate
+   pip install pygame
+   ```
+
+4. Open the .toe project
 
 4. Launch the main.py script
 
