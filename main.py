@@ -6,10 +6,12 @@ from pythonosc import osc_server
 from Library.PySpout import SpoutReceiver, SpoutSender
 from pygame.locals import *
 from OpenGL.GL import *
-from pipeline import Pipeline
+from pipelines.streamdiffusion import Pipeline
 from glUtils import copyToTexture, initReceiver, setupGL, draw
+import torch
+import PIL
 
-DEBUG_FPS = False
+DEBUG_FPS = True
 MAX_LENGTH = 100
 SCREEN_ID = 0
 
@@ -57,27 +59,25 @@ def main(prompt):
         if not spoutReceiver.receive_texture(textureReceiveID, GL_TEXTURE_2D):
             print("texture not received. closing")
             break
-        data = glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE)
-        data = np.frombuffer(data, dtype=np.uint8).reshape((1, 3, h, w)).copy() # 1 x channels x w x h
-        
+
+        data = np.frombuffer(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE), dtype=np.uint8).reshape((w, h , 3)).copy() # 1 x channels x w x h
+        data = PIL.Image.fromarray(data, mode="RGB")
         #generate
         start_time = time.time() # start time of the loop
-        result = pipeline.draw(prompt, data)
+        result = pipeline.predict(prompt, data)
         copyToTexture((result * 255).astype(np.uint8), textureSendID)
-        
-        
+                
         if DEBUG_FPS:
             print("FPS: ", 1.0 / (time.time() - start_time)) # FPS = 1 / time to process loop
         
         # setup window to draw to screen
-        glActiveTexture(GL_TEXTURE0)
-        draw(w, h)
-        pygame.display.flip()        
         
         #send
         if not spoutSender.send_texture(textureSendID, GL_TEXTURE_2D):
             print("Send failed. Exiting")
             break
+    
+    spoutReceiver.release()
 
 if __name__ == "__main__":
     prompt = multiprocessing.Array('c', b'a cat'.ljust(MAX_LENGTH))

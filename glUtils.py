@@ -7,22 +7,10 @@ def setupGL(window_w, window_h):
     # window details
     width = window_w
     height = window_h
-    display = (width,height)
-    
     # window setup
     pygame.init() 
     pygame.display.set_caption('Spout IN/OUT')
-    pygame.display.set_mode(display, DOUBLEBUF|OPENGL)
-
-    # OpenGL init
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-    glOrtho(0,width,height,0,1,-1)
-    glMatrixMode(GL_MODELVIEW)
-    glDisable(GL_DEPTH_TEST)
-    glClearColor(0.0,0.0,0.0,0.0)
-    glEnable(GL_TEXTURE_2D)
-
+    pygame.display.set_mode((1,1), NOFRAME | OPENGL)
 
 def initReceiver(id, w, h):
     glBindTexture(GL_TEXTURE_2D, id)
